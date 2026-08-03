@@ -1,0 +1,50 @@
+<%= layout("/layouts/boilerplate") %>
+<div class="row mt-3">
+    <div class="col-8 offset-2" >
+        <br><br>
+    <h3>Create a new listing</h3>
+    
+    <form method="POST" action="/listings" novalidate class="needs-validation">
+
+        <div class="mb-3">
+            <lable for="title" class="form-lable">Title</lable>
+            <input name="listing[title]" placeholder="Add a Title" type="text" class="form-control" required>
+            <div class="valid-feedback">Title looks good!</div>
+        </div>
+        
+        <div class="mb-3">
+            <lable for="description" class="form-lable">Description</lable>
+            <textarea name="listing[description]" placeholder="" type="text" class="form-control" required ></textarea>
+            <div class="invalid-feedback">Please enter a short description!</div>
+        </div>
+         
+        <div class="mb-3">
+            <lable for="image" class="form-lable">Image Link</lable>
+            <input name="listing[image][url]" placeholder="enter image URL/Link" type="text" class="form-control">
+         </div>
+        
+         <div class="row">
+            <div class="mb-3 col-md-4">
+                <lable for="price" class="form-lable">Price</lable>
+                <input name="listing[price]" placeholder="1500" type="" class="form-control" required>
+                <div class="invalid-feedback">Please enter a valid price!</div>
+            </div>
+            
+            <div class="mb-3 col-md-8">
+                <lable for="country" class="form-lable">Country</lable>
+                <input name="listing[country]" placeholder="India" type="text" class="form-control" required>
+                <div class="invalid-feedback">Please enter a valid Place!</div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <lable for="location" class="form-lable">Location</lable>
+            <input name="listing[location]" placeholder="Delhi, Rajasthan" type="text" class="form-control " required>
+            <div class="invalid-feedback">Please enter a valid location!</div>
+        </div>
+        
+        <button class="btn btn-dark add-btn mt-3 offset-5">Add</button>
+        <br><br>
+    </form>
+    </div>
+</div>
