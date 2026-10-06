@@ -5,6 +5,7 @@ const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/review.js");
 const {reviewSchema} = require("../schema.js");
 const Listing = require("../models/listing.js");
+const {isLoggedIn, isReviewAuthor} = require("../middleware.js");
 
 
 
@@ -21,10 +22,15 @@ const validateReview = (req,res,next) =>{
 };
 
 
-router.post("/",validateReview, wrapAsync(async(req,res) =>{
+router.post("/",isLoggedIn, validateReview, wrapAsync(async(req,res) =>{
     let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
-
+    if(!listing){
+        throw new ExpressError(404, "Cannot find that listing!");
+    }
+    let newReview = new Review({
+        ...req.body.review,
+        author: req.user._id,
+    });
 
     listing.reviews.push(newReview);
 
@@ -35,9 +41,22 @@ router.post("/",validateReview, wrapAsync(async(req,res) =>{
     res.redirect(`/listings/${listing._id}`);
 }));
 
+router.put("/:reviewID",isLoggedIn, isReviewAuthor, validateReview, wrapAsync(async(req,res) =>{
+    const {id, reviewID} = req.params;
+    const review = await Review.findByIdAndUpdate(
+        reviewID,
+        {$set: req.body.review},
+        {runValidators: true}
+    );
+    if(!review){
+        throw new ExpressError(404, "Cannot find that review!");
+    }
+    req.flash("success", "Review updated!");
+    res.redirect(`/listings/${id}`);
+}));
 
 //delete route
-router.delete("/:reviewID", wrapAsync(async(req,res) =>{
+router.delete("/:reviewID",isLoggedIn, isReviewAuthor, wrapAsync(async(req,res) =>{
     let {id,reviewID}= req.params;
 
     await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewID}});

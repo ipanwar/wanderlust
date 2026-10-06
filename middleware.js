@@ -1,0 +1,45 @@
+const Listing = require("./models/listing.js");
+const Review = require("./models/review.js");
+
+module.exports.isLoggedIn = (req,res,next) =>{
+    if(!req.isAuthenticated()){
+        req.session.redirectUrl = req.originalUrl;
+        req.flash("error", "You must be logged in first!");
+        return res.redirect("/login");
+    }
+    next();
+}
+
+module.exports.isListingOwner = async (req,res,next) =>{
+    const listing = await Listing.findById(req.params.id);
+    if(!listing){
+        req.flash("error", "Cannot find that listing!");
+        return res.redirect("/listings");
+    }
+    if(!listing.owner || !listing.owner.equals(req.user._id)){
+        req.flash("error", "You do not have permission to do that!");
+        return res.redirect(`/listings/${listing._id}`);
+    }
+    res.locals.listing = listing;
+    next();
+}
+
+module.exports.isReviewAuthor = async (req,res,next) =>{
+    const review = await Review.findById(req.params.reviewID);
+    if(!review){
+        req.flash("error", "Cannot find that review!");
+        return res.redirect(`/listings/${req.params.id}`);
+    }
+    if(!review.author || !review.author.equals(req.user._id)){
+        req.flash("error", "You do not have permission to do that!");
+        return res.redirect(`/listings/${req.params.id}`);
+    }
+    next();
+}
+
+module.exports.saveRedirectUrl = (req,res,next) =>{
+    if(req.session.redirectUrl){
+        res.locals.redirectUrl = req.session.redirectUrl;
+    }
+    next();
+}
