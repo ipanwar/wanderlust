@@ -1,9 +1,15 @@
 const Listing = require("./models/listing.js");
 const Review = require("./models/review.js");
+const ExpressError = require("./utils/ExpressError.js");
+const { listingSchema, reviewSchema } = require("./schema.js");
 
 module.exports.isLoggedIn = (req,res,next) =>{
     if(!req.isAuthenticated()){
-        req.session.redirectUrl = req.originalUrl;
+        if(req.method === "GET"){
+            req.session.redirectUrl = req.originalUrl;
+        } else {
+            delete req.session.redirectUrl;
+        }
         req.flash("error", "You must be logged in first!");
         return res.redirect("/login");
     }
