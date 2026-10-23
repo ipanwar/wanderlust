@@ -9,8 +9,10 @@
   "author": "Ishant Panwar",
   "license": "ISC",
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.16.2",
     "cloudinary": "^2.11.0",
     "connect-flash": "^0.1.1",
+    "connect-mongo": "^6.0.0",
     "dotenv": "^18.0.6",
     "ejs": "^6.0.1",
     "ejs-mate": "^4.0.0",

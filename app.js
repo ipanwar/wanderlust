@@ -11,6 +11,7 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const Review = require("./models/review.js");
 const session = require("express-session");
+const { MongoStore } = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -21,18 +22,28 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 
-const MONGO_URL= "mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl = process.env.ATLASDB_URL;
 
 main()
     .then(() =>{
         console.log("connected to DB");
+        app.listen(8080, ()=>{
+            console.log("server is running to port 8080");
+        });
     })
     .catch((err) =>{
-        console.log(err);
+        console.error("Failed to connect to MongoDB:", err);
+        for (const [address, server] of err.reason?.servers ?? []) {
+            console.error(`${address}:`, server.error ?? server.type);
+        }
+        process.exitCode = 1;
     })
 
 async function main() {
-    await mongoose.connect(MONGO_URL);
+    if (!dbUrl) {
+        throw new Error("ATLASDB_URL is not set. Add your MongoDB Atlas connection string to .env.");
+    }
+    await mongoose.connect(dbUrl);
 }
 
 app.set("view engine", "ejs");
@@ -43,8 +54,17 @@ app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 
+const store = MongoStore.create({
+    mongoUrl : dbUrl,
+    crypto:{
+        secret:process.env.SECRET
+    },
+    touchAfter: 24*3600, 
+});
+
 const sessionOptions = {
-    secret: "thisshouldbeabettersecret!",
+    store: store,
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -55,9 +75,8 @@ const sessionOptions = {
 }
 
 
-app.get("/",(req,res) =>{
-    res.send("Hi, I am Home");
-});
+
+
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -94,8 +113,4 @@ app.use((err, req, res, next) =>{
     let {statusCode=500, message="Someting Went Wrong!"} = err;
     res.status(statusCode).render("error.ejs", {message});
     // res.status(statusCode).send(message);
-});
-
-app.listen(8080, ()=>{
-    console.log("server is running to port 8080");
 });

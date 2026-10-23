@@ -1,6 +1,8 @@
 <%= layout("/layouts/boilerplate") %>
 <script>
     window.mapToken = <%- JSON.stringify(mapToken) %>;
+    window.listingCoordinates = <%- JSON.stringify(listing.geometry?.coordinates ?? null) %>;
+    window.listingTitle = <%- JSON.stringify(listing.title) %>;
 </script>
 <div class="row">
     <div class="col-8 offset-3 mt-3">
